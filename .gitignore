@@ -43,9 +43,6 @@ coverage.lcov.info
 .env.*
 *.log
 
-# Ignore local scripts
-scan.sh
-
 # Ignore frontend build artifacts
 frontend/coverage/
 frontend/build/
