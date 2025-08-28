@@ -1,0 +1,65 @@
+# Node
+node_modules/
+
+# Build output
+/dist/
+/build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+jspm_packages/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SonarQube
+.sonarqube/
+
+# Dotnet
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+TestResults/
+
+# Coverage
+coverage/
+coverage.lcov.info
+*.lcov
+*.cobertura.xml
+
+# Others
+.env
+.env.*
+*.log
+
+# Ignore local scripts
+scan.sh
+
+# Ignore frontend build artifacts
+frontend/coverage/
+frontend/build/
+
+# Ignore backend build artifacts
+backend/bin/
+backend/obj/
+backend/coverage.cobertura.xml
+
+# Ignore backendTests build artifacts
+backendTests/bin/
+backendTests/obj/
+backendTests/TestResults/
+
+architecture/
+.scannerwork
+**/coverage.opencover.xml

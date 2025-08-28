@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-analyze:
+    runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      DOTNET_ROOT: /usr/share/dotnet
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: Run frontend tests & coverage
+        run: |
+          cd frontend
+          npm test -- --coverage --watchAll=false
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          dotnet restore
+      - name: Run backend tests & coverage
+        run: |
+          cd backend
+          dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
+          reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:./coverage -reporttypes:opencover
+          cp ./coverage/coverage.opencover.xml ./coverage.opencover.xml
+      - name: Download SonarQube Scanner
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+      - name: Run SonarQube Analysis
+        run: |
+          dotnet sonarscanner begin /k:"react-dotnet-todo" /d:sonar.login="${SONAR_TOKEN}" /d:sonar.host.url="http://localhost:9000" /d:sonar.cs.opencover.reportsPaths=backend/coverage.opencover.xml /d:sonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+          dotnet build backend
+          dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
