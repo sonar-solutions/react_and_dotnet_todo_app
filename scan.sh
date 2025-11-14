@@ -34,7 +34,7 @@ dotnet sonarscanner begin \
   /o:"$SONAR_ORG" \
   /d:sonar.host.url="$SONAR_HOST_URL" \
   /d:sonar.token="$SONAR_TOKEN" \
-  /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**,**/backendTests/**,.github/**,scan.sh" \
+  /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**,**/backendTests/**,scan.sh" \
   /d:sonar.test.exclusions="**/backendTests/**" \
   /d:sonar.sourceEncoding="UTF-8" \
   /d:sonar.dotnet.excludeTestProjects=true \
