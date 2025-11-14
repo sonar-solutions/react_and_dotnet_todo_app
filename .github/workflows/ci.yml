@@ -33,17 +33,25 @@ jobs:
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
-      - name: Restore backend dependencies
-        run: dotnet restore react_and_dotnet.sln
-
       - name: Clean previous coverage reports
         run: |
           rm -f backend/coverage.opencover.xml
           rm -f frontend/coverage/lcov.info
 
+      - name: Run backend tests with OpenCover coverage
+        run: |
+          cd backend
+          dotnet test ../backendTests/backend.Tests.csproj \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ../TestResults \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          OPEN_COVER_PATH=$(find ../TestResults -name 'coverage.opencover.xml' | head -n 1)
+          cp "$OPEN_COVER_PATH" coverage.opencover.xml
+          cd ..
 
       - name: SonarScanner begin
         run: |
+          OPEN_COVER_ABS_PATH="$(pwd)/backend/coverage.opencover.xml"
           dotnet sonarscanner begin \
             /k:"$SONAR_PROJECT_KEY" \
             /n:"ReactDotnetTodoApp" \
@@ -55,20 +63,11 @@ jobs:
             /d:sonar.test.exclusions="**/backendTests/**" \
             /d:sonar.sourceEncoding="UTF-8" \
             /d:sonar.dotnet.excludeTestProjects=true \
-            /d:sonar.cs.opencover.reportsPaths="$(pwd)/backend/coverage.opencover.xml" \
+            /d:sonar.cs.opencover.reportsPaths="$OPEN_COVER_ABS_PATH" \
             /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" \
             /d:sonar.coverage.exclusions="**/*.test.js,**/setupTests.js" \
             /d:sonar.scm.provider=git \
             /d:sonar.verbose=true
-
-      - name: Run backend tests with coverage
-        run: |
-          dotnet test backendTests/backend.Tests.csproj \
-            --collect:"XPlat Code Coverage" \
-            --results-directory TestResults \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          OPEN_COVER_PATH=$(find TestResults -name 'coverage.opencover.xml' | head -n 1)
-          cp "$OPEN_COVER_PATH" backend/coverage.opencover.xml
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -84,7 +83,7 @@ jobs:
           fi
 
       - name: Build backend
-        run: dotnet build react_and_dotnet.sln --no-restore --configuration Release
+        run: dotnet build
 
       - name: SonarScanner end
         run: dotnet sonarscanner end "/d:sonar.token=$SONAR_TOKEN"

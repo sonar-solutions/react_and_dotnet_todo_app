@@ -9,7 +9,7 @@ export PATH="$PATH:/Users/joshua.quek/.dotnet/tools"
 SONAR_PROJECT_KEY="solutions_react_and_dotnet_todo_app"
 SONAR_ORG="sonar-solutions" # Optional: set if using SonarCloud
 SONAR_HOST_URL="https://sonarcloud.io" # Change if using SonarCloud or a different server
-SONAR_TOKEN="your token here" # Set your token here or export SONAR_TOKEN in your environment
+SONAR_TOKEN="sonar_token_here" # Set your token here or export SONAR_TOKEN in your environment
 
 # Clean previous reports
 rm -f backend/coverage.opencover.xml
@@ -47,6 +47,7 @@ dotnet sonarscanner begin \
 
 # Run frontend tests with coverage (assumes npm test generates lcov.info)
 cd frontend
+npm ci
 npm test -- --coverage --watchAll=false || true
 # Fix lcov paths so SF:src/ becomes SF:frontend/src/
 if [ -f coverage/lcov.info ]; then
