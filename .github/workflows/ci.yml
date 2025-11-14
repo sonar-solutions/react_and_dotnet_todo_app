@@ -118,11 +118,11 @@ jobs:
             frontend/node_modules
           key: frontend-${{ github.sha }}
 
-      # - name: Install SonarScanner for .NET
-      #   run: dotnet tool install --global dotnet-sonarscanner
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      # - name: Install ReportGenerator
-      #   run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: SonarScanner begin
         run: |
