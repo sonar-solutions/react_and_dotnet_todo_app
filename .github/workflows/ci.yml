@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_PROJECT_KEY: solutions_react_and_dotnet_todo_app
+      SONAR_ORG: sonar-solutions
+      SONAR_HOST_URL: https://sonarcloud.io
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Restore backend dependencies
+        run: dotnet restore backend.sln
+
+      - name: Clean previous coverage reports
+        run: |
+          rm -f backend/coverage.opencover.xml
+          rm -f frontend/coverage/lcov.info
+
+      - name: Run backend tests with coverage
+        run: |
+          dotnet test backendTests/backend.Tests.csproj \
+            --collect:"XPlat Code Coverage" \
+            --results-directory TestResults \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          OPEN_COVER_PATH=$(find TestResults -name 'coverage.opencover.xml' | head -n 1)
+          cp "$OPEN_COVER_PATH" backend/coverage.opencover.xml
+
+      - name: SonarScanner begin
+        run: |
+          dotnet sonarscanner begin \
+            /k:"$SONAR_PROJECT_KEY" \
+            /n:"ReactDotnetTodoApp" \
+            /v:"1.0" \
+            /o:"$SONAR_ORG" \
+            /d:sonar.host.url="$SONAR_HOST_URL" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**,**/backendTests/**,.github/**,scan.sh" \
+            /d:sonar.test.exclusions="**/backendTests/**" \
+            /d:sonar.sourceEncoding="UTF-8" \
+            /d:sonar.dotnet.excludeTestProjects=true \
+            /d:sonar.cs.opencover.reportsPaths="$(pwd)/backend/coverage.opencover.xml" \
+            /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" \
+            /d:sonar.coverage.exclusions="**/*.test.js,**/setupTests.js" \
+            /d:sonar.scm.provider=git \
+            /d:sonar.verbose=true
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: frontend
+        run: |
+          npm test -- --coverage --watchAll=false || true
+          if [ -f coverage/lcov.info ]; then
+            sed 's|SF:src/|SF:frontend/src/|g' coverage/lcov.info > fixed_lcov.info
+            mv fixed_lcov.info coverage/lcov.info
+          fi
+
+      - name: Build backend
+        run: dotnet build
+
+      - name: SonarScanner end
+        run: dotnet sonarscanner end "/d:sonar.token=$SONAR_TOKEN"
