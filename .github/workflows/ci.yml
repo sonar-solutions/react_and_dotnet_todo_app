@@ -34,7 +34,7 @@ jobs:
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Restore backend dependencies
-        run: dotnet restore backend.sln
+        run: dotnet restore react_and_dotnet.sln
 
       - name: Clean previous coverage reports
         run: |
@@ -83,7 +83,7 @@ jobs:
           fi
 
       - name: Build backend
-        run: dotnet build
+        run: dotnet build react_and_dotnet.sln --no-restore --configuration Release
 
       - name: SonarScanner end
         run: dotnet sonarscanner end "/d:sonar.token=$SONAR_TOKEN"
