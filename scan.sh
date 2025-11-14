@@ -9,7 +9,7 @@ export PATH="$PATH:/Users/joshua.quek/.dotnet/tools"
 SONAR_PROJECT_KEY="solutions_react_and_dotnet_todo_app"
 SONAR_ORG="sonar-solutions" # Optional: set if using SonarCloud
 SONAR_HOST_URL="https://sonarcloud.io" # Change if using SonarCloud or a different server
-SONAR_TOKEN="sonar_token_here" # Set your token here or export SONAR_TOKEN in your environment
+SONAR_TOKEN="" # Set your token here or export SONAR_TOKEN in your environment
 
 # Clean previous reports
 rm -f backend/coverage.opencover.xml

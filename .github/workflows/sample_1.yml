@@ -1,9 +1,12 @@
 name: Example
 
 on:
-  pull_request:
+  push:
+    branches:
+      - some_branch
 jobs:
   alpine-nopin:
+    runs-on: ubuntu-latest
     container: alpine  # Noncompliant
 
     steps:
