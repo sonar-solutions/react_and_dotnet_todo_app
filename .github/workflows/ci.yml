@@ -18,9 +18,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Clean previous backend coverage report
+        working-directory: .
         run: rm -f backend/coverage.opencover.xml
 
       - name: Run backend tests with OpenCover coverage
+        working-directory: .
         run: |
           cd backend
           dotnet test ../backendTests/backend.Tests.csproj \
@@ -54,6 +56,7 @@ jobs:
           node-version: '20.x'
 
       - name: Clean previous frontend coverage report
+        working-directory: .
         run: rm -f frontend/coverage/lcov.info
 
       - name: Install frontend dependencies
@@ -119,12 +122,15 @@ jobs:
           key: frontend-${{ github.sha }}
 
       - name: Install SonarScanner for .NET
+        working-directory: .
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Install ReportGenerator
+        working-directory: .
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: SonarScanner begin
+        working-directory: .
         run: |
           OPEN_COVER_ABS_PATH="$(pwd)/backend/coverage.opencover.xml"
           dotnet sonarscanner begin \
@@ -146,7 +152,9 @@ jobs:
             /d:sonar.verbose=true
 
       - name: Build solution
-        run: dotnet build react_and_dotnet.sln
+        working-directory: .
+        run: dotnet build
 
       - name: SonarScanner end
+        working-directory: .
         run: dotnet sonarscanner end "/d:sonar.token=$SONAR_TOKEN"
