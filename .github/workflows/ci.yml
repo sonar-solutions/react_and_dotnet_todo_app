@@ -41,14 +41,6 @@ jobs:
           rm -f backend/coverage.opencover.xml
           rm -f frontend/coverage/lcov.info
 
-      - name: Run backend tests with coverage
-        run: |
-          dotnet test backendTests/backend.Tests.csproj \
-            --collect:"XPlat Code Coverage" \
-            --results-directory TestResults \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          OPEN_COVER_PATH=$(find TestResults -name 'coverage.opencover.xml' | head -n 1)
-          cp "$OPEN_COVER_PATH" backend/coverage.opencover.xml
 
       - name: SonarScanner begin
         run: |
@@ -68,6 +60,15 @@ jobs:
             /d:sonar.coverage.exclusions="**/*.test.js,**/setupTests.js" \
             /d:sonar.scm.provider=git \
             /d:sonar.verbose=true
+
+      - name: Run backend tests with coverage
+        run: |
+          dotnet test backendTests/backend.Tests.csproj \
+            --collect:"XPlat Code Coverage" \
+            --results-directory TestResults \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          OPEN_COVER_PATH=$(find TestResults -name 'coverage.opencover.xml' | head -n 1)
+          cp "$OPEN_COVER_PATH" backend/coverage.opencover.xml
 
       - name: Install frontend dependencies
         working-directory: frontend
