@@ -1,0 +1,11 @@
+name: Example
+
+on:
+  pull_request:
+jobs:
+  alpine-nopin:
+    container: alpine  # Noncompliant
+
+    steps:
+      - run: |
+          cat /etc/os-release
